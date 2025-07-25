@@ -1,0 +1,21 @@
+# Terraform state and backup
+*.tfstate
+*.tfstate.*
+*.backup
+
+# Terraform core dirs
+.terraform/
+.terraform.lock.hcl
+
+# Local variables, crash logs
+crash.log
+terraform.tfvars
+terraform.tfvars.json
+
+# Sensitive/output files
+aws-auth.yaml
+
+# Editor/OS files
+*.swp
+*.swo
+*.DS_Store
