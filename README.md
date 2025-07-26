@@ -224,3 +224,79 @@ IAM Role:
 | Role Attached | Via `aws_iam_role_policy_attachment.cluster_autoscaler_attach` |
 
 ---
+
+# EKS Infrastructure Security Assessment
+
+## 1. Network Security
+
+- **VPC Isolation:**  
+  All cluster resources are created inside a dedicated VPC (`55.0.0.0/16`), isolating traffic from other AWS networks.
+
+- **Subnets:**  
+  - Three **public** subnets (`55.0.1.0/24`, `55.0.2.0/24`, `55.0.3.0/24`) for NAT gateways and potentially load balancers.
+  - Three **private** subnets (`55.0.101.0/24`, `55.0.102.0/24`, `55.0.103.0/24`) for all EKS worker nodes and cluster resources.
+  - **Worker nodes only run in private subnets**, not directly exposed to the internet.
+
+- **NAT Gateway per AZ:**  
+  Each private subnet routes outbound traffic through a dedicated NAT Gateway in a public subnet, improving fault tolerance at higher cost.
+
+---
+
+## 2. EKS API Endpoint Access
+
+- **Endpoint is Public (`endpoint_public_access = true`):**
+  - **The EKS API is accessible from the internet**.
+  - Access is authenticated via AWS IAM.
+  - There is no public access CIDRs restrictions in Terraform, so by default, the EKS API endpoint is open to any IP (as long as IAM authentication succeeds).
+
+---
+
+## 3. Security Groups
+
+- **Cluster Security Group:**
+  - A security group is created for the EKS control plane, but **no ingress or egress rules are defined**
+  - By default:
+    - **Ingress:** all inbound traffic is denied.
+    - **Egress:** all outbound traffic is allowed.
+  - For cluster operation, AWS automatically manages the necessary rules between the control plane and worker nodes (using ENIs and managed settings).
+  - **No explicit rules for node-to-node, pod-to-pod, or load balancer-to-pod traffic** are defined in this config.
+
+---
+
+## 4. IAM & User Access
+
+- **EKS Admin User:**
+  - An IAM user `eks-admin-user` is created with full `AdministratorAccess` (very permissive).
+  > **Purpose:**  Allow viewing of EKS via console.  
+
+  - An access key is generated for programmatic access.
+  - This user is mapped to Kubernetes `system:masters` via a `kubectl patch`, giving full cluster admin rights.
+---
+
+## 5. Node Group IAM
+
+- Worker node group role is **limited** to necessary EKS, ECR, and networking policies.
+
+---
+
+## 6. Autoscaler Security
+
+- The Cluster Autoscaler uses **IRSA (IAM Roles for Service Accounts)**.
+- Only the required autoscaling permissions are granted.
+
+---
+
+
+## 9. Security Summary Table
+
+| Component            | Current Setting                      |  Notes         |
+|----------------------|-------------------------------------|-----------------------|
+| VPC Isolation        | Dedicated VPC, private subnets      |                       |
+| EKS API Endpoint     | Public, unrestricted CIDR           | Requirement           |
+| Node Exposure        | Private subnets, not public         |                       |
+| Security Groups      | No explicit rules                   | Default rules.        |
+| IAM Admin User       | Full admin, static access key       | EKS view from console |
+| Autoscaler           | IRSA + least-privilege policy       |                       |
+
+---
+
