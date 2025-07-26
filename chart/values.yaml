@@ -1,0 +1,29 @@
+namespace: dev
+
+replicaCount: 2
+
+image:
+  repository: komekomeoryza/visitor-app
+  tag: latest
+
+resources:
+  requests:
+    cpu: 100m
+  limits:
+    cpu: 500m
+
+redis:
+  replicaCount: 1
+  image: redis:7-alpine
+
+service:
+  type: LoadBalancer
+  port: 80
+  targetPort: 3000
+
+hpa:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 10
+  cpu:
+    targetAverageUtilization: 60

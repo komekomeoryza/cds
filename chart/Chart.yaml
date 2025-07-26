@@ -1,0 +1,5 @@
+apiVersion: v2
+name: visitor-app
+description: Visitor app with Redis backend
+version: 0.1.0
+appVersion: "latest"

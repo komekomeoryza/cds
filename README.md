@@ -36,11 +36,18 @@ aws eks update-kubeconfig --name my-eks-cluster --region ap-southeast-1
 kubectl get nodes
 
 ## Deploy App on EKS
-
+```
 kubectl apply -f deployment.yaml
 kubectl get svc | grep visitor-app
+```
+Or
+```
+helm upgrade --install visitor-app ./chart \
+  --namespace dev \
+  --create-namespace \
+  -f ./chart/values.yaml
 
-
+```
 # Outputs:
 
 cluster_endpoint = "https://<>.ap-southeast-1.eks.amazonaws.com"
