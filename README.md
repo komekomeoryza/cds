@@ -1,11 +1,11 @@
 # Redis Visitor Counter
 
-## Run Locally (Docker)
-
 ## CICD
 ```
 https://gitlab.com/public7871614/cds
 ```
+
+## Run Locally (Docker)
 
 ### Start Redis
 ```
