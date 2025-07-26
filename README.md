@@ -2,6 +2,11 @@
 
 ## Run Locally (Docker)
 
+## CICD
+```
+https://gitlab.com/public7871614/cds
+```
+
 ### Start Redis
 ```
 docker run -d --name redis redis:7-alpine
@@ -300,3 +305,45 @@ IAM Role:
 
 ---
 
+## ASCII Visualization
+
+                      [Internet]
+                           |
+                   +----------------+
+                   | Internet GW    |
+                   +----------------+
+                   /       |        \
+                  /        |         \
+        +-----------+ +-----------+ +-----------+
+        | Public    | | Public    | | Public    |
+        | Subnet 1  | | Subnet 2  | | Subnet 3  |
+        | 55.0.1.0  | | 55.0.2.0  | | 55.0.3.0  |
+        +-----+-----+ +-----+-----+ +-----+-----+
+              |             |             |
+          +---+---+     +---+---+     +---+---+
+          | NAT 1 |     | NAT 2 |     | NAT 3 |
+          +---+---+     +---+---+     +---+---+
+              |             |             |
+         (Egress        (Egress       (Egress
+           Only)          Only)         Only)
+              |             |             |
+        +-----+-----+ +-----+-----+ +-----+-----+
+        | Private   | | Private   | | Private   |
+        | Subnet 1  | | Subnet 2  | | Subnet 3  |
+        | 55.0.101.0| | 55.0.102.0| | 55.0.103.0|
+        +-----------+ +-----------+ +-----------+
+              |             |             |
+           +-------------------------------+
+           |    EKS Node Group (EC2s)      |
+           |   (Pods, Services, etc)       |
+           +-------------------------------+
+                        |
+         +-------------------------------------+
+         |      EKS Control Plane (AWS)        |
+         | (API Endpoint, IAM Auth, managed)   |
+         +-------------------------------------+
+                        ^
+                        |
+            [kubectl / CI / Admin Workstation]
+            (connects via EKS API Endpoint,
+             which is public, IAM-protected)
